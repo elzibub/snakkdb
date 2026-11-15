@@ -1,0 +1,60 @@
+name: Add a snack
+description: Submit a new snack. A bot turns this into a pull request for review.
+title: "New snack: "
+labels: [new-snack]
+body:
+  - type: input
+    id: name
+    attributes: { label: Name, description: "As printed on the packaging, in Latin script if possible" }
+    validations: { required: true }
+  - type: input
+    id: native_name
+    attributes: { label: Native name, description: "Original-script name, if different (optional)" }
+  - type: input
+    id: countries
+    attributes:
+      label: Countries
+      description: "ISO 3166 two-letter codes, comma separated. Country of origin first. e.g. `JP, KR`"
+    validations: { required: true }
+  - type: input
+    id: manufacturer
+    attributes: { label: Manufacturer }
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      options:
+        - chips-crisps
+        - crackers
+        - biscuits-cookies
+        - chocolate
+        - candy
+        - gummies-jellies
+        - nuts-seeds
+        - puffs-extruded
+        - baked-goods
+        - dried-meat-seafood
+        - dried-fruit
+        - ice-cream-frozen
+        - drinks
+        - other
+    validations: { required: true }
+  - type: input
+    id: flavors
+    attributes: { label: Flavors, description: "Comma separated (optional)" }
+  - type: input
+    id: introduced
+    attributes: { label: Year introduced, description: "Optional" }
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: "What is it, what does it taste like, any lore? Markdown is fine."
+    validations: { required: true }
+  - type: input
+    id: sources
+    attributes: { label: Sources, description: "Links backing up the facts, comma separated (optional)" }
+  - type: markdown
+    attributes:
+      value: |
+        **Photos:** after the bot opens a PR, add one in the PR (only photos you took or that are openly licensed, please).

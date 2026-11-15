@@ -1,0 +1,43 @@
+name: Snack submission → PR
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  convert:
+    if: contains(github.event.issue.labels.*.name, 'new-snack')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+
+      # Untrusted text is passed via env, never interpolated into the script.
+      - id: gen
+        env:
+          ISSUE_BODY: ${{ github.event.issue.body }}
+        run: node scripts/issue-to-snack.mjs
+
+      - name: Open pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SLUG: ${{ steps.gen.outputs.slug }}
+          ISSUE: ${{ github.event.issue.number }}
+          AUTHOR: ${{ github.event.issue.user.login }}
+        run: |
+          branch="submission/issue-$ISSUE"
+          git config user.name "snakkdb-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+          git add "snacks/$SLUG"
+          git commit -m "Add snack: $SLUG" -m "Submitted by @$AUTHOR in #$ISSUE"
+          git push origin "$branch"
+          gh pr create --head "$branch" --title "Add snack: $SLUG" \
+            --body "Submitted by @$AUTHOR. Closes #$ISSUE. Review the generated file, and add a photo at \`snacks/$SLUG/\` if you have one."
+          gh issue comment "$ISSUE" --body "Thanks! I've opened a pull request with your submission. A maintainer will review it."

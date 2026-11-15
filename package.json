@@ -1,0 +1,16 @@
+{
+  "name": "snakkdb",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build && pagefind --site dist",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "astro": "7.4.12"
+  },
+  "devDependencies": {
+    "pagefind": "1.6.0"
+  }
+}

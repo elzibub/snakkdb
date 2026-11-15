@@ -1,0 +1,20 @@
+---
+import { getCollection } from "astro:content";
+import Base from "../../layouts/Base.astro";
+import SnackCard from "../../components/SnackCard.astro";
+import { flag, countryName } from "../../lib/taxonomy";
+
+export async function getStaticPaths() {
+  const snacks = await getCollection("snacks");
+  const codes = [...new Set(snacks.flatMap((s) => s.data.countries))];
+  return codes.map((code) => ({
+    params: { code: code.toLowerCase() },
+    props: { code, snacks: snacks.filter((s) => s.data.countries.includes(code)) },
+  }));
+}
+const { code, snacks } = Astro.props;
+---
+<Base title={countryName(code)}>
+  <h1>{flag(code)} {countryName(code)}</h1>
+  <ul class="grid">{snacks.map((s) => <SnackCard snack={s} />)}</ul>
+</Base>

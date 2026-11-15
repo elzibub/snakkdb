@@ -1,0 +1,25 @@
+---
+import { Image } from "astro:assets";
+import type { CollectionEntry } from "astro:content";
+import { flag, countryName, categoryLabel } from "../lib/taxonomy";
+import { url } from "../lib/url";
+interface Props { snack: CollectionEntry<"snacks"> }
+const { snack } = Astro.props;
+const d = snack.data;
+---
+<li class="card">
+  <a href={url(`snacks/${snack.id}/`)}>
+    {d.photo
+      ? <Image src={d.photo} alt={d.name} width={400} height={300} fit="cover" />
+      : <div class="ph">{flag(d.countries[0])}</div>}
+    <strong>{d.name}</strong>
+  </a>
+  <div class="muted">{flag(d.countries[0])} {countryName(d.countries[0])} · {categoryLabel(d.category)}</div>
+</li>
+<style>
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: .75rem; padding: .75rem; }
+  .card a { text-decoration: none; color: var(--fg); display: block; }
+  .card :global(img), .ph { width: 100%; aspect-ratio: 4/3; object-fit: cover; border-radius: .5rem; margin-bottom: .5rem; }
+  .ph { display: grid; place-items: center; font-size: 3rem; background: var(--line); }
+  .muted { font-size: .85rem; }
+</style>

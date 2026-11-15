@@ -1,0 +1,19 @@
+---
+import { getCollection } from "astro:content";
+import Base from "../layouts/Base.astro";
+import SnackCard from "../components/SnackCard.astro";
+import { flag, countryName } from "../lib/taxonomy";
+import { url, newSnackUrl } from "../lib/url";
+
+const snacks = (await getCollection("snacks")).sort((a, b) => a.data.name.localeCompare(b.data.name));
+const countries = [...new Set(snacks.map((s) => s.data.countries[0]))].sort();
+---
+<Base>
+  <h1>Snacks of the world</h1>
+  <p class="muted">
+    {snacks.length} snacks from {countries.length} countries.
+    Know one we're missing? <a href={newSnackUrl()}>Add it</a>, no account wrangling beyond GitHub required.
+  </p>
+  <p>{countries.map((c) => <a class="tag" href={url(`countries/${c.toLowerCase()}/`)}>{flag(c)} {countryName(c)}</a>)}</p>
+  <ul class="grid">{snacks.map((s) => <SnackCard snack={s} />)}</ul>
+</Base>

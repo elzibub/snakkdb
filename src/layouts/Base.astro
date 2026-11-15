@@ -1,0 +1,49 @@
+---
+import { url, newSnackUrl } from "../lib/url";
+interface Props { title?: string; description?: string }
+const { title, description = "An open, git-based database of snack foods from around the world." } = Astro.props;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title ? `${title} · SnakkDB` : "SnakkDB"}</title>
+    <meta name="description" content={description} />
+    <link rel="stylesheet" href={url("pagefind/pagefind-ui.css")} />
+    <style is:global>
+      :root { --bg: #fffdf8; --fg: #222; --muted: #6b6b6b; --accent: #d9480f; --card: #fff; --line: #eee3d3; }
+      @media (prefers-color-scheme: dark) {
+        :root { --bg: #17140f; --fg: #eee; --muted: #a39d93; --accent: #ff8a4c; --card: #211d17; --line: #3a3228; }
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; font: 16px/1.6 system-ui, sans-serif; background: var(--bg); color: var(--fg); }
+      a { color: var(--accent); }
+      header, main, footer { max-width: 60rem; margin: 0 auto; padding: 1rem; }
+      header { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; border-bottom: 1px solid var(--line); }
+      header .logo { font-weight: 800; font-size: 1.3rem; text-decoration: none; color: var(--fg); }
+      header nav { display: flex; gap: 1rem; margin-left: auto; }
+      footer { color: var(--muted); font-size: .9rem; border-top: 1px solid var(--line); margin-top: 3rem; }
+      .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr)); gap: 1rem; padding: 0; list-style: none; }
+      .muted { color: var(--muted); }
+      .tag { display: inline-block; padding: 0 .5rem; border: 1px solid var(--line); border-radius: 1rem; font-size: .85rem; margin: 0 .25rem .25rem 0; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <a class="logo" href={url("/")}>🍘 SnakkDB</a>
+      <nav>
+        <a href={url("countries/")}>Countries</a>
+        <a href={url("categories/")}>Categories</a>
+        <a href={url("search/")}>Search</a>
+        <a href={newSnackUrl()}>+ Add a snack</a>
+      </nav>
+    </header>
+    <main data-pagefind-body={Astro.url.pathname.includes("/snacks/") ? "" : undefined}>
+      <slot />
+    </main>
+    <footer>
+      Content is CC BY-SA 4.0 and lives in a git repo. Every page is editable via pull request.
+    </footer>
+  </body>
+</html>

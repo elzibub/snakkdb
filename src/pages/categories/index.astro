@@ -1,0 +1,17 @@
+---
+import { getCollection } from "astro:content";
+import Base from "../../layouts/Base.astro";
+import { CATEGORIES, categoryLabel } from "../../lib/taxonomy";
+import { url } from "../../lib/url";
+
+const snacks = await getCollection("snacks");
+---
+<Base title="Categories">
+  <h1>Categories</h1>
+  <ul>{CATEGORIES.map((c) => {
+    const n = snacks.filter((s) => s.data.category === c).length;
+    return n > 0
+      ? <li><a href={url(`categories/${c}/`)}>{categoryLabel(c)}</a> <span class="muted">({n})</span></li>
+      : <li class="muted">{categoryLabel(c)} (0)</li>;
+  })}</ul>
+</Base>

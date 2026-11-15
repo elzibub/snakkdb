@@ -1,0 +1,61 @@
+# SnakkDB
+
+An open database of snack foods from around the world. The data is plain
+markdown in git, the site is static, and every contribution is a pull request.
+
+## How it works
+
+```
+snacks/<slug>/index.md   ← one snack: YAML frontmatter + markdown description
+snacks/<slug>/photo.jpg  ← optional photo, referenced as `photo: ./photo.jpg`
+src/content.config.ts    ← the schema: the rules every entry has to follow
+src/lib/taxonomy.ts      ← categories, plus country names/flags from ISO codes
+```
+
+- **Build:** [Astro](https://astro.build) turns `snacks/` into static pages
+  (per snack, per country, per category). [Pagefind](https://pagefind.app)
+  builds a search index that runs in the browser, so there's no search server.
+- **Validation:** the build checks every entry against the schema. A bad
+  submission fails CI on its PR with a readable error.
+- **Contributing, two ways:**
+  1. *Non-git people:* the "Add a snack" issue form. `issue-to-pr.yml` turns
+     the issue into `snacks/<slug>/index.md` and opens a PR.
+  2. *Git people:* the "Edit this page" link on every page, or a regular PR.
+     GitHub handles the fork for them.
+- **Deploy:** pushing to `main` builds the site and publishes it to GitHub Pages.
+
+## Local dev
+
+```sh
+npm install
+npm run dev        # http://localhost:4321 (search only works after `npm run build && npm run preview`)
+```
+
+## One-time GitHub setup
+
+1. Create the repo (public) and push.
+2. Settings → Pages → Source: **GitHub Actions**.
+3. Create an issue label named `new-snack` (issue forms only apply labels that already exist).
+4. Settings → Actions → General → Workflow permissions: allow Actions to
+   **create pull requests**.
+5. Optional: a custom domain. Point DNS at Pages, then remove the `BASE`
+   env var in `ci.yml` and set `SITE` to your domain.
+
+**Known quirk:** PRs opened by the bot with the default `GITHUB_TOKEN` don't
+trigger CI (GitHub does this on purpose to stop workflow loops). Closing and
+reopening the PR kicks CI off. To make it automatic, give the workflow a
+GitHub App token or a fine-grained PAT instead.
+
+## Cost
+
+$0 for a public repo: GitHub Pages hosting, Actions minutes and storage are all
+free. The limits you could eventually hit:
+
+| Limit | Value | When it matters |
+|---|---|---|
+| Pages site size | 1 GB | Photos, at around 10k snacks |
+| Pages bandwidth | 100 GB/month (soft) | Real popularity. Cloudflare Pages has no bandwidth cap and works as a drop-in replacement |
+| Repo size | ~1 GB recommended, 5 GB hard-ish | Photos again. Keep them under ~200 KB each and enforce that in CI |
+| Build time | Pages builds run up to 10 min | Tens of thousands of entries |
+
+The only cost worth planning for is a domain name (~$10/yr), and that's optional.
