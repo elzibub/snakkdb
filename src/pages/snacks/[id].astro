@@ -1,20 +1,31 @@
 ---
-import { getCollection, render, type CollectionEntry } from "astro:content";
+import { render } from "astro:content";
 import { Image } from "astro:assets";
 import Base from "../../layouts/Base.astro";
+import { loadData, type Snack } from "../../lib/data";
 import { flag, countryName, categoryLabel } from "../../lib/taxonomy";
 import { url, editUrl } from "../../lib/url";
 
 export async function getStaticPaths() {
-  return (await getCollection("snacks")).map((snack) => ({ params: { id: snack.id }, props: { snack } }));
+  const { snacks } = await loadData();
+  return snacks.map((snack) => ({ params: { id: snack.id }, props: { snack } }));
 }
-const { snack } = Astro.props as { snack: CollectionEntry<"snacks"> };
+const { snack } = Astro.props as { snack: Snack };
+const { makers } = await loadData();
 const d = snack.data;
 const { Content } = await render(snack);
+
+const maker = (ref?: { id: string }) => (ref ? makers.get(ref.id) : undefined);
+const m = maker(d.manufacturer);
+const parent = maker(m?.data.parent);
+const years = (i?: number, x?: number) => (i && x ? `${i}–${x}` : i ? `since ${i}` : x ? `until ${x}` : "");
 ---
 <Base title={d.name}>
   <article>
-    <h1>{d.name} {d.native_name && <span class="muted">({d.native_name})</span>}</h1>
+    <h1>{d.name}</h1>
+    {d.names.length > 0 && (
+      <p class="names">{d.names.map((n) => <span lang={n.lang} class="tag">{n.text}</span>)}</p>
+    )}
     {d.photo && (
       <figure>
         <Image src={d.photo} alt={d.name} width={800} />
@@ -22,15 +33,51 @@ const { Content } = await render(snack);
       </figure>
     )}
     <dl>
-      <dt>From</dt>
-      <dd>{d.countries.map((c) => <a class="tag" href={url(`countries/${c.toLowerCase()}/`)}>{flag(c)} {countryName(c)}</a>)}</dd>
-      <dt>Category</dt>
-      <dd><a href={url(`categories/${d.category}/`)}>{categoryLabel(d.category)}</a></dd>
-      {d.manufacturer && <><dt>Made by</dt><dd>{d.manufacturer}</dd></>}
-      {d.introduced && <><dt>Introduced</dt><dd>{d.introduced}{d.discontinued && " (discontinued)"}</dd></>}
+      <dt>Origin</dt><dd>{[d.origin].map((c) => <a class="tag" href={url(`countries/${c.toLowerCase()}/`)}>{flag(c)} {countryName(c)}</a>)}</dd>
+      {d.available_in.length > 0 && <><dt>Also sold in</dt><dd>{d.available_in.map((c) => <a class="tag" href={url(`countries/${c.toLowerCase()}/`)}>{flag(c)} {countryName(c)}</a>)}</dd></>}
+      <dt>Category</dt><dd><a href={url(`categories/${d.category}/`)}>{categoryLabel(d.category)}</a></dd>
+      {m && (
+        <><dt>Made by</dt><dd>
+          <a href={url(`manufacturers/${m.id}/`)}>{m.data.name}</a>
+          {parent && <span class="muted"> (part of <a href={url(`manufacturers/${parent.id}/`)}>{parent.data.name}</a>)</span>}
+        </dd></>
+      )}
+      {(d.introduced || d.discontinued) && (
+        <><dt>Years</dt><dd>{years(d.introduced, d.discontinued)}{d.discontinued && " (discontinued)"}</dd></>
+      )}
       {d.flavors.length > 0 && <><dt>Flavors</dt><dd>{d.flavors.map((f) => <span class="tag">{f}</span>)}</dd></>}
     </dl>
+
     <Content />
+
+    {d.aliases.length > 0 && (
+      <>
+        <h2>Also known as</h2>
+        <ul>{d.aliases.map((a) => {
+          const am = maker(a.manufacturer);
+          return <li><strong>{a.name}</strong> in {a.countries.map((c) => `${flag(c)} ${countryName(c)}`).join(", ")}
+            {am && <> (made by <a href={url(`manufacturers/${am.id}/`)}>{am.data.name}</a>)</>}</li>;
+        })}</ul>
+      </>
+    )}
+
+    {d.variants.length > 0 && (
+      <>
+        <h2>Variants</h2>
+        <table>
+          <thead><tr><th>Name</th><th>Flavors</th><th>Where</th><th>Years</th></tr></thead>
+          <tbody>{d.variants.map((v) => (
+            <tr>
+              <td>{v.name}{v.limited && <span class="tag">limited</span>}</td>
+              <td>{v.flavors.join(", ")}</td>
+              <td>{v.countries.map(flag).join(" ")}</td>
+              <td>{years(v.introduced, v.discontinued)}</td>
+            </tr>
+          ))}</tbody>
+        </table>
+      </>
+    )}
+
     {d.sources.length > 0 && (
       <><h2>Sources</h2><ul>{d.sources.map((s) => <li><a href={s}>{s}</a></li>)}</ul></>
     )}
@@ -40,5 +87,8 @@ const { Content } = await render(snack);
 <style>
   dl { display: grid; grid-template-columns: max-content 1fr; gap: .25rem 1rem; }
   dt { font-weight: 600; } dd { margin: 0; }
+  .names .tag { font-size: 1.1rem; }
   figure { margin: 1rem 0; } figure :global(img) { max-width: 100%; height: auto; border-radius: .5rem; }
+  table { border-collapse: collapse; width: 100%; display: block; overflow-x: auto; }
+  th, td { text-align: left; padding: .35rem .75rem .35rem 0; border-bottom: 1px solid var(--line); }
 </style>

@@ -6,14 +6,16 @@ markdown in git, the site is static, and every contribution is a pull request.
 ## How it works
 
 ```
-snacks/<slug>/index.md   ← one snack: YAML frontmatter + markdown description
-snacks/<slug>/photo.jpg  ← optional photo, referenced as `photo: ./photo.jpg`
-src/content.config.ts    ← the schema: the rules every entry has to follow
-src/lib/taxonomy.ts      ← categories, plus country names/flags from ISO codes
+snacks/<slug>/index.md        ← one product line: YAML frontmatter + English description
+snacks/<slug>/photo.jpg       ← optional photo, referenced as `photo: ./photo.jpg`
+manufacturers/<slug>.md       ← one company; snacks point at it by slug
+redirects.json                ← old slug → new slug, for anything renamed or removed
+src/content.config.ts         ← the schema: the rules every entry has to follow
+src/lib/taxonomy.ts           ← categories, plus country names/flags from ISO codes
 ```
 
-- **Build:** [Astro](https://astro.build) turns `snacks/` into static pages
-  (per snack, per country, per category). [Pagefind](https://pagefind.app)
+- **Build:** [Astro](https://astro.build) turns `snacks/` and `manufacturers/`
+  into static pages (per snack, country, category and manufacturer). [Pagefind](https://pagefind.app)
   builds a search index that runs in the browser, so there's no search server.
 - **Validation:** the build checks every entry against the schema. A bad
   submission fails CI on its PR with a readable error.
@@ -23,6 +25,51 @@ src/lib/taxonomy.ts      ← categories, plus country names/flags from ISO codes
   2. *Git people:* the "Edit this page" link on every page, or a regular PR.
      GitHub handles the fork for them.
 - **Deploy:** pushing to `main` builds the site and publishes it to GitHub Pages.
+
+## The data model
+
+**One entry is one product line.** "Pocky", not "Pocky Matcha". Flavours and
+limited editions go in `variants`; the same product sold under another name
+somewhere else (Pocky is sold as Mikado in Europe) goes in `aliases`. A variant
+that deserves its own page can graduate to one later.
+
+```yaml
+---
+name: Pocky                      # required
+names:                           # the name in other scripts, with a BCP 47 language tag
+  - { text: ポッキー, lang: ja }
+aliases:                         # same product, different name/maker elsewhere
+  - { name: Mikado, countries: [FR, DE], manufacturer: mondelez-international }
+origin: JP                       # required, ISO 3166-1 alpha-2
+available_in: [KR, US]           # loose, never complete
+manufacturer: ezaki-glico        # slug of a file in manufacturers/
+category: biscuits-cookies       # required, see src/lib/taxonomy.ts
+flavors: [chocolate]
+introduced: 1966
+discontinued: 2019               # a year; omit if still made
+variants:
+  - { name: Matcha, flavors: [matcha], countries: [JP], limited: false }
+photo: ./photo.jpg               # needs photo_credit
+photo_credit: "Jane Doe, CC BY 4.0"
+sources: [https://en.wikipedia.org/wiki/Pocky]
+---
+English description in markdown.
+```
+
+Manufacturers are tiny: `name`, plus optional `country`, `website` and `parent`
+(another manufacturer's slug, e.g. Barcel → Grupo Bimbo).
+
+**Slugs are permanent.** The folder or file name is the URL. Lowercase `a-z`,
+digits and hyphens only, and never renamed once merged. If one really has to
+change, add `"snacks/old": "snacks/new"` to `redirects.json`; CI fails a PR
+that removes a slug without one.
+
+**Translations** will live next to the English file as `index.<lang>.md`
+(e.g. `index.ja.md`). They aren't loaded yet, but the layout is reserved.
+
+The build fails, with a message naming the file and field, on misspelled or
+unknown fields, bad country/language codes, invalid slugs, and manufacturer
+slugs that don't exist.
 
 ## Local dev
 

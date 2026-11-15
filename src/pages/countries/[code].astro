@@ -1,20 +1,25 @@
 ---
-import { getCollection } from "astro:content";
 import Base from "../../layouts/Base.astro";
 import SnackCard from "../../components/SnackCard.astro";
+import { loadData, allCountries } from "../../lib/data";
 import { flag, countryName } from "../../lib/taxonomy";
 
 export async function getStaticPaths() {
-  const snacks = await getCollection("snacks");
-  const codes = [...new Set(snacks.flatMap((s) => s.data.countries))];
+  const { snacks } = await loadData();
+  const codes = [...new Set(snacks.flatMap(allCountries))];
   return codes.map((code) => ({
     params: { code: code.toLowerCase() },
-    props: { code, snacks: snacks.filter((s) => s.data.countries.includes(code)) },
+    props: {
+      code,
+      from: snacks.filter((s) => s.data.origin === code),
+      sold: snacks.filter((s) => s.data.origin !== code && allCountries(s).includes(code)),
+    },
   }));
 }
-const { code, snacks } = Astro.props;
+const { code, from, sold } = Astro.props;
 ---
 <Base title={countryName(code)}>
   <h1>{flag(code)} {countryName(code)}</h1>
-  <ul class="grid">{snacks.map((s) => <SnackCard snack={s} />)}</ul>
+  {from.length > 0 && <><h2>From {countryName(code)}</h2><ul class="grid">{from.map((s) => <SnackCard snack={s} />)}</ul></>}
+  {sold.length > 0 && <><h2>Also found here</h2><ul class="grid">{sold.map((s) => <SnackCard snack={s} />)}</ul></>}
 </Base>

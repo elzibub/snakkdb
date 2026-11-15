@@ -1,0 +1,19 @@
+---
+import Base from "../../layouts/Base.astro";
+import { loadData } from "../../lib/data";
+import { flag } from "../../lib/taxonomy";
+import { url } from "../../lib/url";
+
+const { snacks, makers } = await loadData();
+const rows = [...makers.values()].sort((a, b) => a.data.name.localeCompare(b.data.name));
+const count = (id: string) => snacks.filter((s) => s.data.manufacturer?.id === id).length;
+---
+<Base title="Manufacturers">
+  <h1>Manufacturers</h1>
+  <ul>{rows.map((m) => (
+    <li>
+      {m.data.country && flag(m.data.country)} <a href={url(`manufacturers/${m.id}/`)}>{m.data.name}</a>
+      <span class="muted">({count(m.id)})</span>
+    </li>
+  ))}</ul>
+</Base>

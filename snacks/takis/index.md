@@ -1,10 +1,15 @@
 ---
 name: Takis
-countries: [MX, US]
-manufacturer: Barcel
+origin: MX
+available_in: [US]
+manufacturer: barcel
 category: chips-crisps
 flavors: [chili, lime]
 introduced: 1999
+variants:
+  - { name: Fuego, flavors: [chili, lime] }
+  - { name: Nitro, flavors: [habanero, lime] }
+  - { name: Blue Heat, flavors: [chili] }
 sources:
   - https://en.wikipedia.org/wiki/Takis
 ---

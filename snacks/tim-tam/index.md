@@ -1,10 +1,14 @@
 ---
 name: Tim Tam
-countries: [AU]
-manufacturer: Arnott's
+origin: AU
+manufacturer: arnotts
 category: biscuits-cookies
-flavors: [chocolate, caramel]
+flavors: [chocolate]
 introduced: 1964
+variants:
+  - { name: Original, flavors: [chocolate] }
+  - { name: Double Coat, flavors: [chocolate] }
+  - { name: Dark Chocolate, flavors: [dark chocolate] }
 sources:
   - https://en.wikipedia.org/wiki/Tim_Tam
 ---

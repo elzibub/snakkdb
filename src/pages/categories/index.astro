@@ -1,10 +1,10 @@
 ---
-import { getCollection } from "astro:content";
+import { loadData } from "../../lib/data";
 import Base from "../../layouts/Base.astro";
 import { CATEGORIES, categoryLabel } from "../../lib/taxonomy";
 import { url } from "../../lib/url";
 
-const snacks = await getCollection("snacks");
+const { snacks } = await loadData();
 ---
 <Base title="Categories">
   <h1>Categories</h1>

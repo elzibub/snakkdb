@@ -1,12 +1,12 @@
 ---
-import { getCollection } from "astro:content";
 import Base from "../layouts/Base.astro";
 import SnackCard from "../components/SnackCard.astro";
+import { loadData } from "../lib/data";
 import { flag, countryName } from "../lib/taxonomy";
 import { url, newSnackUrl } from "../lib/url";
 
-const snacks = (await getCollection("snacks")).sort((a, b) => a.data.name.localeCompare(b.data.name));
-const countries = [...new Set(snacks.map((s) => s.data.countries[0]))].sort();
+const { snacks } = await loadData();
+const countries = [...new Set(snacks.map((s) => s.data.origin))].sort();
 ---
 <Base>
   <h1>Snacks of the world</h1>

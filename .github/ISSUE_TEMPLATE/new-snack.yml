@@ -3,22 +3,31 @@ description: Submit a new snack. A bot turns this into a pull request for review
 title: "New snack: "
 labels: [new-snack]
 body:
+  - type: markdown
+    attributes:
+      value: |
+        One entry per **product line**: "Pocky", not "Pocky Matcha". Flavours and
+        limited editions go under *Variants*. Please search the site first.
   - type: input
     id: name
     attributes: { label: Name, description: "As printed on the packaging, in Latin script if possible" }
     validations: { required: true }
   - type: input
-    id: native_name
-    attributes: { label: Native name, description: "Original-script name, if different (optional)" }
+    id: local_name
+    attributes: { label: Local name, description: "The name in its original script, if different (optional), e.g. ポッキー" }
   - type: input
-    id: countries
-    attributes:
-      label: Countries
-      description: "ISO 3166 two-letter codes, comma separated. Country of origin first. e.g. `JP, KR`"
+    id: local_lang
+    attributes: { label: Local name language, description: "Language code for the local name, e.g. ja, ko, zh-Hant, th" }
+  - type: input
+    id: origin
+    attributes: { label: Country of origin, description: "Two-letter ISO code, e.g. JP" }
     validations: { required: true }
   - type: input
+    id: available_in
+    attributes: { label: Also sold in, description: "Other countries where you've seen it, comma separated (optional), e.g. US, KR" }
+  - type: input
     id: manufacturer
-    attributes: { label: Manufacturer }
+    attributes: { label: Manufacturer, description: "Company name (optional). New companies are added automatically." }
   - type: dropdown
     id: category
     attributes:
@@ -42,6 +51,9 @@ body:
   - type: input
     id: flavors
     attributes: { label: Flavors, description: "Comma separated (optional)" }
+  - type: textarea
+    id: variants
+    attributes: { label: Variants, description: "One per line (optional), e.g. Strawberry, Matcha, Double Coat" }
   - type: input
     id: introduced
     attributes: { label: Year introduced, description: "Optional" }
@@ -49,7 +61,7 @@ body:
     id: description
     attributes:
       label: Description
-      description: "What is it, what does it taste like, any lore? Markdown is fine."
+      description: "What is it, what does it taste like, any lore? Markdown is fine. English please; translations come later."
     validations: { required: true }
   - type: input
     id: sources
@@ -57,4 +69,4 @@ body:
   - type: markdown
     attributes:
       value: |
-        **Photos:** after the bot opens a PR, add one in the PR (only photos you took or that are openly licensed, please).
+        **Photos:** after the bot opens a PR, add one there (only photos you took or that are openly licensed, please).

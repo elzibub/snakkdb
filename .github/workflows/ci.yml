@@ -14,9 +14,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: npm }
       - run: npm ci
+      - name: Slugs are permanent
+        if: github.event_name == 'pull_request'
+        env: { BASE_REF: "${{ github.base_ref }}" }
+        run: node scripts/check-slugs.mjs "origin/$BASE_REF"
       # The content schema runs during the build, so a malformed submission fails here.
       - run: npm run build
         env:
