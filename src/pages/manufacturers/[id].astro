@@ -1,4 +1,5 @@
 ---
+import { render } from "astro:content";
 import Base from "../../layouts/Base.astro";
 import SnackCard from "../../components/SnackCard.astro";
 import { loadData, type Manufacturer } from "../../lib/data";
@@ -12,6 +13,7 @@ export async function getStaticPaths() {
 const { m } = Astro.props as { m: Manufacturer };
 const { snacks, makers } = await loadData();
 const d = m.data;
+const { Content } = await render(m);
 const parent = d.parent && makers.get(d.parent.id);
 const subsidiaries = [...makers.values()].filter((x) => x.data.parent?.id === m.id);
 const made = snacks.filter((s) => s.data.manufacturer?.id === m.id);
@@ -24,6 +26,7 @@ const licensed = snacks.filter((s) => s.data.aliases.some((a) => a.manufacturer?
     {parent && <> · part of <a href={url(`manufacturers/${parent.id}/`)}>{parent.data.name}</a></>}
     {d.website && <> · <a href={d.website}>website</a></>}
   </p>
+  <Content />
   {subsidiaries.length > 0 && (
     <p>Brands: {subsidiaries.map((s) => <a class="tag" href={url(`manufacturers/${s.id}/`)}>{s.data.name}</a>)}</p>
   )}

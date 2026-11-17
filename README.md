@@ -40,6 +40,7 @@ names:                           # the name in other scripts, with a BCP 47 lang
   - { text: ポッキー, lang: ja }
 aliases:                         # same product, different name/maker elsewhere
   - { name: Mikado, countries: [FR, DE], manufacturer: mondelez-international }
+  # an old name: { name: Marathon, countries: [GB], discontinued: 1990 }
 origin: JP                       # required, ISO 3166-1 alpha-2
 available_in: [KR, US]           # loose, never complete
 manufacturer: ezaki-glico        # slug of a file in manufacturers/
@@ -49,6 +50,7 @@ introduced: 1966
 discontinued: 2019               # a year; omit if still made
 variants:
   - { name: Matcha, flavors: [matcha], countries: [JP], limited: false }
+related: [some-other-snack]      # slugs of connected snacks; shown on both pages
 photo: ./photo.jpg               # needs photo_credit
 photo_credit: "Jane Doe, CC BY 4.0"
 sources: [https://en.wikipedia.org/wiki/Pocky]
@@ -56,8 +58,36 @@ sources: [https://en.wikipedia.org/wiki/Pocky]
 English description in markdown.
 ```
 
+- **`category`** is what the snack mostly is, not its coating: a
+  chocolate-covered biscuit or wafer (Tim Tam, Pocky, KitKat, Twix) is
+  `biscuits-cookies`. Chocolate bars with a soft filling (Snickers, Mars) are
+  `chocolate`; chewy or hard sweets with no chocolate are `candy`.
+- **`flavors`** are tastes, not textures or shapes ("chocolate", not "wafer").
+  They're normalised on load: lowercase, with `&` turned into `and`, so
+  "Salt & Vinegar" and "salt and vinegar" are the same flavour. Variant *names*
+  stay as printed on the pack.
+- **`related`** links snacks that are separate products but belong together:
+  one modelled on another (Saeukkang → Kappa Ebisen), or a local brand that
+  now shares a range with a global one (Walkers ↔ Lay's). Add it on one side;
+  both pages show the link.
+- **Variants vs. separate entries:** a variant is the same snack in a
+  different flavour (Wotsits Cheese, Wotsits Sweet & Spicy) or a different pack
+  (sticks vs. bags of wrapped pieces, Soreen's Lunchbox Loaves). Packs,
+  portions and wrapping never make a new entry. A snack that eats differently
+  (bigger pieces, a different texture or shape) gets its own entry, linked
+  with `related` (Wotsits Giants, Wotsits Crunchy → Wotsits).
+- **Aliases vs. separate entries:** an alias is the *same* product under
+  another name. If the other name has its own history (founded separately,
+  bought later), give it its own entry and link the two with `related`.
+
+- **Same name, different snack:** when two separate products share a name
+  (the US Milky Way is like a Mars bar; Europe's Milky Way is like
+  3 Musketeers), each gets the name plus its origin code as the slug:
+  `milky-way-us`, `milky-way-gb`. The bare `milky-way` stays free.
+
 Manufacturers are tiny: `name`, plus optional `country`, `website` and `parent`
-(another manufacturer's slug, e.g. Barcel → Grupo Bimbo).
+(another manufacturer's slug, e.g. Barcel → Grupo Bimbo). Anything under the
+frontmatter, such as former company names, is shown on the manufacturer's page.
 
 **Slugs are permanent.** The folder or file name is the URL. Lowercase `a-z`,
 digits and hyphens only, and never renamed once merged. If one really has to

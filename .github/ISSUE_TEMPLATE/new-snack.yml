@@ -32,6 +32,7 @@ body:
     id: category
     attributes:
       label: Category
+      description: "What the snack mostly is, not its coating: a chocolate-covered biscuit is biscuits-cookies"
       options:
         - chips-crisps
         - crackers
@@ -41,6 +42,7 @@ body:
         - gummies-jellies
         - nuts-seeds
         - puffs-extruded
+        - namkeen
         - baked-goods
         - dried-meat-seafood
         - dried-fruit
@@ -50,7 +52,7 @@ body:
     validations: { required: true }
   - type: input
     id: flavors
-    attributes: { label: Flavors, description: "Comma separated (optional)" }
+    attributes: { label: Flavors, description: "What it tastes like, comma separated (optional), e.g. chocolate, salt and vinegar. Not textures or shapes." }
   - type: textarea
     id: variants
     attributes: { label: Variants, description: "One per line (optional), e.g. Strawberry, Matcha, Double Coat" }

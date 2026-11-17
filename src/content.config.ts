@@ -18,6 +18,12 @@ const country = z.string().regex(/^[A-Z]{2}$/, "Use an ISO 3166-1 alpha-2 code, 
 // BCP 47-ish: "ja", "zh-Hant", "pt-BR".
 const lang = z.string().regex(/^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$/, "Use a BCP 47 language tag, e.g. ja or zh-Hant");
 const year = z.number().int().min(1700).max(2100);
+// Flavours are free text, normalised so the same flavour is spelled one way:
+// lowercase, trimmed, single spaces, "&" written as "and" ("Salt & Vinegar" -> "salt and vinegar").
+const flavor = z
+  .string()
+  .min(1)
+  .transform((f) => f.toLowerCase().replace(/\s*&\s*/g, " and ").replace(/\s+/g, " ").trim());
 
 // One file per company: manufacturers/<slug>.md
 const manufacturers = defineCollection({
@@ -40,14 +46,22 @@ const snacks = defineCollection({
         name: z.string().min(1),
         // The name in other languages/scripts.
         names: z.array(z.strictObject({ text: z.string().min(1), lang })).default([]),
-        // The same product sold under a different name somewhere else.
+        // The same product sold under a different name somewhere else. Add
+        // `discontinued` for a name that's no longer used (Marathon -> Snickers, 1990).
         aliases: z
           .array(
-            z.strictObject({
-              name: z.string().min(1),
-              countries: z.array(country).min(1),
-              manufacturer: reference("manufacturers").optional(),
-            }),
+            z
+              .strictObject({
+                name: z.string().min(1),
+                countries: z.array(country).min(1),
+                manufacturer: reference("manufacturers").optional(),
+                introduced: year.optional(),
+                discontinued: year.optional(),
+              })
+              .refine((a) => !a.discontinued || !a.introduced || a.discontinued >= a.introduced, {
+                message: "discontinued can't be before introduced",
+                path: ["discontinued"],
+              }),
           )
           .default([]),
         origin: country,
@@ -55,7 +69,7 @@ const snacks = defineCollection({
         available_in: z.array(country).default([]),
         manufacturer: reference("manufacturers").optional(),
         category: z.enum(CATEGORIES),
-        flavors: z.array(z.string().toLowerCase()).default([]),
+        flavors: z.array(flavor).default([]),
         introduced: year.optional(),
         discontinued: year.optional(),
         // Flavours, sizes, limited editions. A distinctive variant can get its own page later.
@@ -63,7 +77,7 @@ const snacks = defineCollection({
           .array(
             z.strictObject({
               name: z.string().min(1),
-              flavors: z.array(z.string().toLowerCase()).default([]),
+              flavors: z.array(flavor).default([]),
               countries: z.array(country).default([]),
               limited: z.boolean().default(false),
               introduced: year.optional(),
@@ -71,6 +85,9 @@ const snacks = defineCollection({
             }),
           )
           .default([]),
+        // Other snacks this one is connected to: modelled on, sister brand, rebadge.
+        // Links show up on both pages, so it only needs adding on one side.
+        related: z.array(reference("snacks")).default([]),
         photo: image().optional(),
         photo_credit: z.string().optional(),
         sources: z.array(z.string().url()).default([]),

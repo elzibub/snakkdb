@@ -1,5 +1,9 @@
 // Keep this list short and broad; finer distinctions belong in `flavors`.
-// Adding a category is a one-line PR here.
+// Adding a category is a one-line PR here (and in .github/ISSUE_TEMPLATE/new-snack.yml).
+// Classify by what the snack mostly is, not its coating: a chocolate-covered
+// biscuit or wafer (Tim Tam, Pocky, KitKat, Twix) is biscuits-cookies. Chocolate
+// bars and sweets with a soft filling (nougat, caramel, peanuts: Snickers, Mars,
+// M&M's) are "chocolate"; chewy and hard sweets with no chocolate are "candy".
 export const CATEGORIES = [
   "chips-crisps",
   "crackers",
@@ -9,6 +13,7 @@ export const CATEGORIES = [
   "gummies-jellies",
   "nuts-seeds",
   "puffs-extruded",
+  "namkeen", // fried savoury South Asian snacks: bhujia, sev, chakli, Bombay mix
   "baked-goods",
   "dried-meat-seafood",
   "dried-fruit",

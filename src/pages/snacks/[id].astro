@@ -2,7 +2,7 @@
 import { render } from "astro:content";
 import { Image } from "astro:assets";
 import Base from "../../layouts/Base.astro";
-import { loadData, type Snack } from "../../lib/data";
+import { loadData, relatedTo, type Snack } from "../../lib/data";
 import { flag, countryName, categoryLabel } from "../../lib/taxonomy";
 import { url, editUrl } from "../../lib/url";
 
@@ -11,7 +11,8 @@ export async function getStaticPaths() {
   return snacks.map((snack) => ({ params: { id: snack.id }, props: { snack } }));
 }
 const { snack } = Astro.props as { snack: Snack };
-const { makers } = await loadData();
+const { makers, snacks } = await loadData();
+const related = relatedTo(snack, snacks);
 const d = snack.data;
 const { Content } = await render(snack);
 
@@ -56,7 +57,8 @@ const years = (i?: number, x?: number) => (i && x ? `${i}–${x}` : i ? `since $
         <ul>{d.aliases.map((a) => {
           const am = maker(a.manufacturer);
           return <li><strong>{a.name}</strong> in {a.countries.map((c) => `${flag(c)} ${countryName(c)}`).join(", ")}
-            {am && <> (made by <a href={url(`manufacturers/${am.id}/`)}>{am.data.name}</a>)</>}</li>;
+            {am && <> (made by <a href={url(`manufacturers/${am.id}/`)}>{am.data.name}</a>)</>}
+            {(a.introduced || a.discontinued) && <span class="muted"> · {years(a.introduced, a.discontinued)}{a.discontinued && ", former name"}</span>}</li>;
         })}</ul>
       </>
     )}
@@ -75,6 +77,15 @@ const years = (i?: number, x?: number) => (i && x ? `${i}–${x}` : i ? `since $
             </tr>
           ))}</tbody>
         </table>
+      </>
+    )}
+
+    {related.length > 0 && (
+      <>
+        <h2>Related</h2>
+        <ul>{related.map((r) => (
+          <li><a href={url(`snacks/${r.id}/`)}>{r.data.name}</a> <span class="muted">{flag(r.data.origin)} {countryName(r.data.origin)}</span></li>
+        ))}</ul>
       </>
     )}
 
